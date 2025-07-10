@@ -1,4 +1,4 @@
-module github.com/yourusername/tge-bot-go
+module  bot-go
 
 go 1.23.10
 

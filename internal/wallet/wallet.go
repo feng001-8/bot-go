@@ -1,9 +1,11 @@
 package wallet
 
 import (
+	"context"
 	"crypto/ecdsa"
 	"fmt"
 	"math/big"
+	"time"
 
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common"
@@ -149,7 +151,11 @@ func (w *Wallet) GetAddressHex() string {
 
 // GetChainID 获取链ID
 func (wc *WalletClient) GetChainID() (*big.Int, error) {
-	return wc.Client.ChainID(nil)
+	// 创建带超时的context
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	return wc.Client.ChainID(ctx)
 }
 
 // Close 关闭客户端连接
@@ -157,4 +163,21 @@ func (wc *WalletClient) Close() {
 	if wc.Client != nil {
 		wc.Client.Close()
 	}
+}
+
+// 实现助记词的生成
+func GenerateMnemonic() (string, error) {
+	// 生成12个随机助记词
+	entropy, err := bip39.NewEntropy(128)
+	if err != nil {
+		return "", err
+	}
+
+	// 从熵生成助记词
+	mnemonic, err := bip39.NewMnemonic(entropy)
+	if err != nil {
+		return "", err
+	}
+
+	return mnemonic, nil
 }
